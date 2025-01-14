@@ -33,7 +33,7 @@ function App() {
                         <SidebarProvider>
                             <AppSidebar />
                             <SidebarInset>
-                                <div className="flex flex-1 flex-col gap-4 size-full container">
+                                <div className="flex flex-1 flex-col gap-4 size-full container ml-20">
                                     <Routes>
                                         <Route path="/" element={<Home />} />
                                         <Route

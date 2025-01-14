@@ -187,7 +187,26 @@ Ensure that your prompt is detailed, vivid, and incorporates all the elements me
 
         const res: { image: string; caption: string }[] = [];
 
+        // Add debugging messages
+        elizaLogger.log('Options:', options);
+        elizaLogger.log('Image Settings:', imageSettings);
+        elizaLogger.log('Runtime:', runtime);
+
+        // Check for undefined objects
+        if (!options) {
+            elizaLogger.error('Options is undefined');
+            throw new Error('Options is undefined');
+        }
+        if (!imageSettings) {
+            elizaLogger.error('Image Settings is undefined');
+            throw new Error('Image Settings is undefined');
+        }
+        if (!runtime) {
+            elizaLogger.error('Runtime is undefined');
+            throw new Error('Runtime is undefined');
+        }
         elizaLogger.log("Generating image with prompt:", imagePrompt);
+
         const images = await generateImage(
             {
                 prompt: imagePrompt,

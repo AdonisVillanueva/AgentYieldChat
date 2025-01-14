@@ -6,9 +6,23 @@
         {
             "type": "typescript",
             "tsconfig": "packages/core/tsconfig.json",
-            "problemMatcher": ["$tsc"],
+            "problemMatcher": [
+                "$tsc"
+            ],
             "label": "tsbuild",
             "group": "build"
+        },
+        {
+            "label": "tsc: build - tsconfig.json",
+            "type": "typescript",
+            "tsconfig": "tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
