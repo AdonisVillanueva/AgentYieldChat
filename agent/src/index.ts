@@ -44,7 +44,6 @@ import createGoatPlugin from "@elizaos/plugin-goat";
 // import { intifacePlugin } from "@elizaos/plugin-intiface";
 import { ThreeDGenerationPlugin } from "@elizaos/plugin-3d-generation";
 import { abstractPlugin } from "@elizaos/plugin-abstract";
-import { akashPlugin } from "@elizaos/plugin-akash";
 import { alloraPlugin } from "@elizaos/plugin-allora";
 import { aptosPlugin } from "@elizaos/plugin-aptos";
 import { artheraPlugin } from "@elizaos/plugin-arthera";
@@ -540,11 +539,6 @@ export function getTokenForProvider(
                 character.settings?.secrets?.ATOMASDK_BEARER_AUTH ||
                 settings.ATOMASDK_BEARER_AUTH
             );
-        case ModelProviderName.AKASH_CHAT_API:
-            return (
-                character.settings?.secrets?.AKASH_CHAT_API_KEY ||
-                settings.AKASH_CHAT_API_KEY
-            );
         case ModelProviderName.GOOGLE:
             return (
                 character.settings?.secrets?.GOOGLE_GENERATIVE_AI_API_KEY ||
@@ -583,71 +577,127 @@ export function getTokenForProvider(
 }
 
 function initializeDatabase(dataDir: string) {
+    elizaLogger.info("Initializing database connection...");
+    elizaLogger.debug("Checking database configuration...");
+
     if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
-        elizaLogger.info("Initializing Supabase connection...");
+        elizaLogger.info("Supabase credentials detected, initializing Supabase connection...");
+        elizaLogger.debug(`Supabase URL: ${process.env.SUPABASE_URL}`);
+
         const db = new SupabaseDatabaseAdapter(
             process.env.SUPABASE_URL,
             process.env.SUPABASE_ANON_KEY
         );
 
-        // Test the connection
-        db.init()
+        elizaLogger.debug("Testing Supabase connection...");
+        return db.init()
             .then(() => {
-                elizaLogger.success(
-                    "Successfully connected to Supabase database"
-                );
+                elizaLogger.success("Successfully connected to Supabase database");
+                return db;
             })
             .catch((error) => {
                 elizaLogger.error("Failed to connect to Supabase:", error);
+                throw error;
             });
 
-        return db;
     } else if (process.env.POSTGRES_URL) {
-        elizaLogger.info("Initializing PostgreSQL connection...");
+        elizaLogger.info("PostgreSQL URL detected, initializing PostgreSQL connection...");
+        elizaLogger.debug(`PostgreSQL URL: ${process.env.POSTGRES_URL}`);
+
         const db = new PostgresDatabaseAdapter({
             connectionString: process.env.POSTGRES_URL,
             parseInputs: true,
         });
 
-        // Test the connection
-        db.init()
+        elizaLogger.debug("Testing PostgreSQL connection...");
+        return db.init()
             .then(() => {
-                elizaLogger.success(
-                    "Successfully connected to PostgreSQL database"
-                );
+                elizaLogger.success("Successfully connected to PostgreSQL database");
+                return db;
             })
             .catch((error) => {
                 elizaLogger.error("Failed to connect to PostgreSQL:", error);
+                throw error;
             });
 
-        return db;
     } else if (process.env.PGLITE_DATA_DIR) {
-        elizaLogger.info("Initializing PgLite adapter...");
-        // `dataDir: memory://` for in memory pg
+        elizaLogger.info("PgLite data directory detected, initializing PgLite adapter...");
+        elizaLogger.debug(`PgLite data directory: ${process.env.PGLITE_DATA_DIR}`);
+
         const db = new PGLiteDatabaseAdapter({
             dataDir: process.env.PGLITE_DATA_DIR,
         });
-        return db;
-    } else {
-        const filePath =
-            process.env.SQLITE_FILE ?? path.resolve(dataDir, "db.sqlite");
-        elizaLogger.info(`Initializing SQLite database at ${filePath}...`);
-        const db = new SqliteDatabaseAdapter(new Database(filePath));
 
-        // Test the connection
-        db.init()
+        elizaLogger.debug("Initializing PgLite database...");
+        return db.init()
             .then(() => {
-                elizaLogger.success(
-                    "Successfully connected to SQLite database"
-                );
+                elizaLogger.success("Successfully initialized PgLite database");
+                return db;
             })
             .catch((error) => {
-                elizaLogger.error("Failed to connect to SQLite:", error);
+                elizaLogger.error("Failed to initialize PgLite database:", error);
+                throw error;
             });
 
-        return db;
+    } else {
+        const filePath = process.env.SQLITE_FILE ?? path.resolve(dataDir, "db.sqlite");
+        elizaLogger.info("No external database configured, falling back to SQLite...");
+        elizaLogger.debug(`SQLite database path: ${filePath}`);
+
+        // Ensure directory exists with proper permissions
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) {
+            elizaLogger.debug(`Creating directory for SQLite database: ${dir}`);
+            try {
+                fs.mkdirSync(dir, { recursive: true, mode: 0o755 });
+            } catch (error) {
+                elizaLogger.error(`Failed to create directory ${dir}:`, error);
+                throw error;
+            }
+        }
+
+        try {
+            const sqliteDb = new Database(filePath);
+
+            // Test write permissions before setting WAL mode
+            sqliteDb.prepare('CREATE TABLE IF NOT EXISTS _test_table (id INTEGER PRIMARY KEY)').run();
+            sqliteDb.prepare('DROP TABLE IF EXISTS _test_table').run();
+
+            // Try to enable WAL mode
+            try {
+                sqliteDb.pragma('journal_mode = WAL');
+                sqliteDb.pragma('synchronous = NORMAL');
+            } catch (error) {
+                elizaLogger.warn("Failed to enable WAL mode, falling back to DELETE journal mode:", error);
+                sqliteDb.pragma('journal_mode = DELETE');
+                sqliteDb.pragma('synchronous = FULL');
+            }
+
+            const db = new SqliteDatabaseAdapter(sqliteDb);
+
+            elizaLogger.debug("Testing SQLite connection...");
+            return db.init()
+                .then(() => {
+                    elizaLogger.success("Successfully connected to SQLite database");
+                    return db;
+                })
+                .catch((error) => {
+                    elizaLogger.error("Failed to connect to SQLite:", error);
+                    // Close the database before throwing
+                    try {
+                        sqliteDb.close();
+                    } catch (closeError) {
+                        elizaLogger.warn("Failed to close SQLite database:", closeError);
+                    }
+                    throw error;
+                });
+        } catch (error) {
+            elizaLogger.error("Failed to initialize SQLite database:", error);
+            throw error;
+        }
     }
 }
+
 
 // also adds plugins from character file into the runtime
 export async function initializeClients(
@@ -1007,10 +1057,6 @@ export async function createAgent(
             getSecret(character, "HYPERLIQUID_TESTNET")
                 ? hyperliquidPlugin
                 : null,
-            getSecret(character, "AKASH_MNEMONIC") &&
-            getSecret(character, "AKASH_WALLET_ADDRESS")
-                ? akashPlugin
-                : null,
             getSecret(character, "QUAI_PRIVATE_KEY") ? quaiPlugin : null,
             getSecret(character, "RESERVOIR_API_KEY")
                 ? createNFTCollectionsPlugin()
@@ -1117,10 +1163,7 @@ async function startAgent(
             fs.mkdirSync(dataDir, { recursive: true });
         }
 
-        db = initializeDatabase(dataDir) as IDatabaseAdapter &
-            IDatabaseCacheAdapter;
-
-        await db.init();
+        db = await initializeDatabase(dataDir);
 
         const cache = initializeCache(
             process.env.CACHE_STORE ?? CacheStore.DATABASE,
