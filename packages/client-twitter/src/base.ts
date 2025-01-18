@@ -548,9 +548,10 @@ export class ClientBase extends EventEmitter {
         // Add tweet IDs to the Set
         for (const tweet of allTweets) {
             tweetIdsToCheck.add(tweet.id);
-            roomIds.add(
-                stringToUuid(tweet.conversationId + "-" + this.runtime.agentId)
-            );
+                    const conversationId = tweet.conversationId?.toString() || "unknown";
+                    roomIds.add(
+                        stringToUuid(conversationId + "-" + this.runtime.agentId)
+                    );
         }
 
         // Check the existing memories in the database
