@@ -119,7 +119,7 @@ async function bringCode(dataTxid: string): Promise<CodeResult> {
     const txInfo = await fetchTransactionInfo(dataTxid);
     if (!txInfo || !txInfo.tail_tx) return ERROR_RESULT;
 
-    let chunks: string[] = [];
+    const chunks: string[] = [];
     let before_tx = txInfo.tail_tx;
 
     if (before_tx === null) return ERROR_RESULT;

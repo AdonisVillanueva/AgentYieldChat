@@ -363,7 +363,7 @@ export class ImageDescriptionService
 
         try {
             await this.provider.initialize();
-        } catch (error) {
+        } catch {
             elizaLogger.error(
                 `Failed to initialize the image vision model provider: ${this.runtime.imageVisionModelProvider}`
             );
@@ -450,7 +450,8 @@ export class ImageDescriptionService
 
         if (this.initialized) {
             try {
-                const { data, mimeType } = await this.loadImageData(imageUrlOrPath);
+                const { data, mimeType } =
+                    await this.loadImageData(imageUrlOrPath);
                 return await this.provider.describeImage(data, mimeType);
             } catch (error) {
                 elizaLogger.error("Error in describeImage:", error);
