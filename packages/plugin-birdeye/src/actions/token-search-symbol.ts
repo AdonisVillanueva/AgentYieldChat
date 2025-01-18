@@ -1,13 +1,13 @@
 import {
-    Action,
-    ActionExample,
+    type Action,
+    type ActionExample,
     elizaLogger,
-    IAgentRuntime,
-    Memory,
-    State,
+    type IAgentRuntime,
+    type Memory,
+    type State,
 } from "@elizaos/core";
 import { BirdeyeProvider } from "../birdeye";
-import { TokenResult } from "../types/api/search";
+import type { TokenResult } from "../types/api/search";
 import {
     extractSymbols,
     formatPercentChange,

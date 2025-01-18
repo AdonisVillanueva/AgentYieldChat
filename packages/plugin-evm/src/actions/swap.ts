@@ -8,12 +8,12 @@ import {
 import {
     createConfig,
     executeRoute,
-    ExtendedChain,
+    type ExtendedChain,
     getRoutes,
     Route,
 } from "@lifi/sdk";
 
-import { initWalletProvider, WalletProvider } from "../providers/wallet";
+import { initWalletProvider, type WalletProvider } from "../providers/wallet";
 import { swapTemplate } from "../templates";
 import type { SwapParams, SwapQuote, Transaction } from "../types";
 import {

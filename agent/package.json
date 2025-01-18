@@ -51,6 +51,16 @@
         "@elizaos/plugin-coinbase": "workspace:*",
         "@elizaos/plugin-coingecko": "workspace:*",
         "@elizaos/plugin-coinmarketcap": "workspace:*",
+<<<<<<< HEAD
+=======
+        "@elizaos/plugin-binance": "workspace:*",
+        "@elizaos/plugin-avail": "workspace:*",
+        "@elizaos/plugin-bootstrap": "workspace:*",
+        "@elizaos/plugin-di": "workspace:*",
+        "@elizaos/plugin-cosmos": "workspace:*",
+        "@elizaos/plugin-intiface": "workspace:*",
+        "@elizaos/plugin-coinbase": "workspace:*",
+>>>>>>> 5b57a6d6aba887a3527da9c5c9bdf6d631d6792a
         "@elizaos/plugin-conflux": "workspace:*",
         "@elizaos/plugin-cosmos": "workspace:*",
         "@elizaos/plugin-cronoszkevm": "workspace:*",

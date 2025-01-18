@@ -35,29 +35,6 @@ const ERROR_RESULT: CodeResult = {
 // Initialize connection
 const connection = new Connection(NETWORK, "confirmed");
 
-async function fetchDBPDA(): Promise<string | null> {
-    if (!WALLET_ADDRESS) {
-        elizaLogger.error("Wallet address not provided");
-        return null;
-    }
-
-    try {
-        elizaLogger.info("Connecting to Solana...(IQ6900)");
-        elizaLogger.info(`Your Address: ${WALLET_ADDRESS}`);
-
-        const response = await fetch(`${IQ_HOST}/getDBPDA/${WALLET_ADDRESS}`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.DBPDA || null;
-    } catch (error) {
-        elizaLogger.error("Error fetching PDA:", error);
-        return null;
-    }
-}
-
 async function convertTextToEmoji(text: string): Promise<string> {
     return text.replace(/\/u([0-9A-Fa-f]{4,6})/g, (_, code) =>
         String.fromCodePoint(parseInt(code, 16))
@@ -77,6 +54,29 @@ async function fetchTransactionInfo(
         return data.argData || null;
     } catch (error) {
         elizaLogger.error("Error fetching transaction info:", error);
+        return null;
+    }
+}
+
+async function fetchDBPDA(): Promise<string | null> {
+    if (!WALLET_ADDRESS) {
+        elizaLogger.error("Wallet address not provided");
+        return null;
+    }
+
+    try {
+        elizaLogger.info("Connecting to Solana...(IQ6900)");
+        elizaLogger.info(`Your Address: ${WALLET_ADDRESS}`);
+
+        const response = await fetch(`${IQ_HOST}/getDBPDA/${WALLET_ADDRESS}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.DBPDA || null;
+    } catch (error) {
+        elizaLogger.error("Error fetching PDA:", error);
         return null;
     }
 }

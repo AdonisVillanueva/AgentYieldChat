@@ -1,8 +1,8 @@
 import {
     elizaLogger,
     getEndpoint,
-    IAgentRuntime,
-    IImageDescriptionService,
+    type IAgentRuntime,
+    type IImageDescriptionService,
     ModelProviderName,
     models,
     Service,
@@ -13,9 +13,9 @@ import {
     AutoTokenizer,
     env,
     Florence2ForConditionalGeneration,
-    Florence2Processor,
-    PreTrainedModel,
-    PreTrainedTokenizer,
+    type Florence2Processor,
+    type PreTrainedModel,
+    type PreTrainedTokenizer,
     RawImage,
     type Tensor,
 } from "@huggingface/transformers";
@@ -69,7 +69,7 @@ class LocalImageProvider implements ImageProvider {
     private model: PreTrainedModel | null = null;
     private processor: Florence2Processor | null = null;
     private tokenizer: PreTrainedTokenizer | null = null;
-    private modelId: string = "onnx-community/Florence-2-base-ft";
+    private modelId = "onnx-community/Florence-2-base-ft";
 
     async initialize(): Promise<void> {
         env.allowLocalModels = false;
@@ -283,7 +283,7 @@ export class ImageDescriptionService
 {
     static serviceType: ServiceType = ServiceType.IMAGE_DESCRIPTION;
 
-    private initialized: boolean = false;
+    private initialized = false;
     private runtime: IAgentRuntime | null = null;
     private provider: ImageProvider | null = null;
 

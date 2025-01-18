@@ -1,20 +1,16 @@
 import { generateImage, elizaLogger } from "@elizaos/core";
-import {
-    Connection,
-    Keypair,
-    PublicKey,
-    VersionedTransaction,
-} from "@solana/web3.js";
+import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import { VersionedTransaction } from "@solana/web3.js";
 import { Fomo, PurchaseCurrency } from "fomo-sdk-solana";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import bs58 from "bs58";
 import {
     settings,
-    ActionExample,
-    Content,
-    HandlerCallback,
-    IAgentRuntime,
-    Memory,
+    type ActionExample,
+    type Content,
+    type HandlerCallback,
+    type IAgentRuntime,
+    type Memory,
     ModelClass,
     State,
     generateObject,
@@ -521,10 +517,10 @@ export default {
                 runtime.getSetting("SOLANA_PRIVATE_KEY") ??
                 runtime.getSetting("WALLET_PRIVATE_KEY");
             const secretKey = bs58.decode(privateKeyString);
-            const deployerKeypair = Keypair.fromSecretKey(secretKey);
+            const deployerKeypair = Keypair.fromSecretKey(secretKey) as any;
 
             // Generate new mint keypair
-            const mintKeypair = Keypair.generate();
+            const mintKeypair = Keypair.generate() as any;
             elizaLogger.log(
                 `Generated mint address: ${mintKeypair.publicKey.toBase58()}`
             );
@@ -532,11 +528,11 @@ export default {
             // Setup connection and SDK
             const connection = new Connection(settings.SOLANA_RPC_URL!, {
                 commitment: "confirmed",
-                confirmTransactionInitialTimeout: 500000, // 120 seconds
+                confirmTransactionInitialTimeout: 500000,
                 wsEndpoint: settings.SOLANA_RPC_URL!.replace("https", "wss"),
             });
 
-            const sdk = new Fomo(connection, "devnet", deployerKeypair);
+            const sdk = new Fomo(connection as any, "devnet", deployerKeypair);
             // const slippage = runtime.getSetting("SLIPPAGE");
 
             const createAndBuyConfirmation = await promptConfirmation();
@@ -550,8 +546,8 @@ export default {
 
             elizaLogger.log("Executing create and buy transaction...");
             const result = await createAndBuyToken({
-                deployer: deployerKeypair,
-                mint: mintKeypair,
+                deployer: deployerKeypair as any,
+                mint: mintKeypair as any,
                 tokenMetadata: fullTokenMetadata,
                 buyAmountSol: BigInt(lamports),
                 priorityFee: priorityFee.unitPrice,

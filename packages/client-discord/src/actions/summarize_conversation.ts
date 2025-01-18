@@ -3,15 +3,15 @@ import { generateText, splitChunks, trimTokens } from "@elizaos/core";
 import { getActorDetails } from "@elizaos/core";
 import { parseJSONObjectFromText } from "@elizaos/core";
 import {
-    Action,
-    ActionExample,
-    Content,
-    HandlerCallback,
-    IAgentRuntime,
-    Media,
-    Memory,
+    type Action,
+    type ActionExample,
+    type Content,
+    type HandlerCallback,
+    type IAgentRuntime,
+    type Media,
+    type Memory,
     ModelClass,
-    State,
+    type State,
 } from "@elizaos/core";
 export const summarizationTemplate = `# Summarized so far (we are adding to this)
 {{currentSummary}}
@@ -98,10 +98,10 @@ const getDateRange = async (
                 )?.[0];
 
                 const startInteger = startIntegerString
-                    ? parseInt(startIntegerString)
+                    ? Number.parseInt(startIntegerString)
                     : 0;
                 const endInteger = endIntegerString
-                    ? parseInt(endIntegerString)
+                    ? Number.parseInt(endIntegerString)
                     : 0;
 
                 // multiply by multiplier
@@ -220,8 +220,8 @@ const summarizeAction = {
         const memories = await runtime.messageManager.getMemories({
             roomId,
             // subtract start from current time
-            start: parseInt(start as string),
-            end: parseInt(end as string),
+            start: Number.parseInt(start as string),
+            end: Number.parseInt(end as string),
             count: 10000,
             unique: false,
         });
@@ -307,7 +307,7 @@ ${currentSummary.trim()}
             await callback(
                 {
                     ...callbackData,
-                    text: `I've attached the summary of the conversation from \`${new Date(parseInt(start as string)).toString()}\` to \`${new Date(parseInt(end as string)).toString()}\` as a text file.`,
+                    text: `I've attached the summary of the conversation from \`${new Date(Number.parseInt(start as string)).toString()}\` to \`${new Date(Number.parseInt(end as string)).toString()}\` as a text file.`,
                 },
                 [summaryFilename]
             );

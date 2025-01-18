@@ -1,14 +1,14 @@
 import {
-    ActionExample,
+    type ActionExample,
     composeContext,
-    Content,
+    type Content,
     elizaLogger,
     generateObjectDeprecated,
-    HandlerCallback,
-    IAgentRuntime,
-    Memory,
+    type HandlerCallback,
+    type IAgentRuntime,
+    type Memory,
     ModelClass,
-    State,
+    type State,
     type Action,
 } from "@elizaos/core";
 import { getSAK } from "../client";
@@ -94,7 +94,7 @@ export default {
             if (callback) {
                 callback({
                     text: "Unable to process create token request. Invalid content provided.",
-                    content: { error: "Invalid creat token content" },
+                    content: { error: "Invalid create token content" },
                 });
             }
             return false;

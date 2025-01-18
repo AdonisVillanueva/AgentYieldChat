@@ -1,5 +1,5 @@
-import { elizaLogger, IAgentRuntime } from "@elizaos/core";
-import { Fraction, Percent } from "@uniswap/sdk-core";
+import { elizaLogger, type IAgentRuntime } from "@elizaos/core";
+import { type Fraction, Percent } from "@uniswap/sdk-core";
 import { Account, Contract, RpcProvider } from "starknet";
 
 export const getTokenBalance = async (
